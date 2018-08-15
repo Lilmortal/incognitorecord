@@ -5,13 +5,18 @@ import (
 	"net/http"
 )
 
-func handleFunc() {
-	http.HandleFunc("/", HandleRoute)
+var PORT_NUMBER = 3000
 
-	log.Fatal(http.ListenAndServe(":3000", nil))
+func getNewMux() *http.ServeMux {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", HandleRoute)
+	return mux
 }
 
 // StartServer starts the server
 func StartServer() {
-	handleFunc()
+	mux := getNewMux()
+
+	log.Fatal(http.ListenAndServe(":{{PORT_NUMBER}}", mux))
 }
