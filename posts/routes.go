@@ -1,16 +1,17 @@
 package posts
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
 
-var PORT_NUMBER = 3000
+var portNumber = 3000
 
 func getNewMux() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", HandleRoute)
+	mux.HandleFunc("/posts", HandleRoute)
 	return mux
 }
 
@@ -18,5 +19,5 @@ func getNewMux() *http.ServeMux {
 func StartServer() {
 	mux := getNewMux()
 
-	log.Fatal(http.ListenAndServe(":{{PORT_NUMBER}}", mux))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s%d", ":", portNumber), mux))
 }

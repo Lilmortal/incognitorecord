@@ -7,7 +7,6 @@ import (
 
 // HandleRoute handles route
 func HandleRoute(writer http.ResponseWriter, request *http.Request) {
-	// writer.Write([]byte("aaa"))
 	fmt.Fprintf(writer, "rgrhr")
-	fmt.Println("tesaaat")
+	fmt.Println(request.URL)
 }
