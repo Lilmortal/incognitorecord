@@ -2,21 +2,40 @@ package posts
 
 import (
 	"fmt"
+	"incognitorecord/db"
+	"log"
 	"net/http"
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws/awserr"
 )
 
-// HandleRoute handles route
-func HandleRoute(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(writer, "rgrhr")
+// HandlePostsV1 is a handler for posts in v1
+// TODO: Think of a good name
+type HandlePostsV1 struct {
+	db db.DatabaseClient
+}
 
-	// thing := strings.TrimPrefix(request.URL.Path, "/posts/")
-
-	id, err := request.URL.Query()["key"]
-
-	if !err || len(id[0]) < 1 {
-		fmt.Fprintf(writer, "Can't find key")
-		return
+// TODO: After creating table, it should create post after that
+func (handler HandlePostsV1) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	_, err := handler.db.CreatePost(time.Now(), "Title", "Post")
+	if err != nil {
+		// TODO: Understand what this means...
+		if awsErr, ok := err.(awserr.Error); ok {
+			switch awsErr.Code() {
+			case "ResourceNotFoundException":
+				_, err = handler.db.CreateTable()
+				if err != nil {
+					if awsErr, ok := err.(awserr.Error); ok {
+						log.Println("Failed to create table", awsErr.Code(), awsErr.Message(), awsErr.OrigErr())
+					}
+				}
+			default:
+				log.Println("Failed to create post: ", awsErr.Code(), awsErr.Message(), awsErr.OrigErr())
+			}
+		}
 	}
 
-		fmt.Fprintf(writer, id[0])
+	fmt.Fprintf(writer, "Post created.")
+	log.Println("Post created.")
 }

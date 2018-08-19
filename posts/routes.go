@@ -2,25 +2,23 @@ package posts
 
 import (
 	"fmt"
+	"incognitorecord/config"
+	"incognitorecord/db/dynamo"
 	"log"
 	"net/http"
 )
 
 var portNumber = 3000
 
-type handleV1 struct {
-	mux *http.ServeMux
-}
-
-func (v handleV1) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println("is it working")
-	v.mux.HandleFunc("/posts", HandleRoute)
-}
-
 func getNewMux() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.Handle("/api/v1", handleV1{mux})
+	db, err := dynamo.New(config.Region)
+	if err != nil {
+		panic("Failed to create session: " + err.Error())
+	}
+
+	mux.Handle("/api/v1/posts", HandlePostsV1{db})
 	return mux
 }
 
