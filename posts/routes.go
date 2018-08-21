@@ -15,10 +15,14 @@ func getNewMux() *http.ServeMux {
 
 	db, err := dynamo.New(config.Region)
 	if err != nil {
+		// TODO: How do most Golang applications handle errors
 		panic("Failed to create session: " + err.Error())
 	}
 
-	mux.Handle("/api/v1/posts", HandlePostsV1{db})
+	mux1 := http.NewServeMux()
+	mux1.Handle("/posts", DynamoPostCreator{db})
+
+	mux.Handle("/api/v1", HandlePostsV1{db, mux: mux1})
 	return mux
 }
 

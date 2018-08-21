@@ -8,5 +8,10 @@ import (
 // TODO: The convention names for golang interfaces are that they ends with "er". e.g. Reader. Think of a good name
 type DatabaseClient interface {
 	CreateTable() (interface{}, error)
-	CreatePost(creationDate time.Time, title string, post string) (interface{}, error)
 }
+
+type PostCreator interface {
+	CreatePost(creationDate time.Time, title string, post string) error
+}
+
+// PostReader
