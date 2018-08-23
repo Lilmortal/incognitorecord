@@ -7,7 +7,7 @@ import (
 // DatabaseClient is a generic interface that will be implemented by different databases, it will handle posts.
 // TODO: The convention names for golang interfaces are that they ends with "er". e.g. Reader. Think of a good name
 type DatabaseClient interface {
-	CreateTable() (interface{}, error)
+	CreateTable() error
 }
 
 type PostCreator interface {
