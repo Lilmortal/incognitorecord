@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// HandlerGroup handles linking URL paths to a handler
 type HandlerGroup []struct {
 	Path    string
 	Handler http.Handler
@@ -16,6 +17,7 @@ func recoverRoutes() {
 	}
 }
 
+// Register function handles linking the prefix and the paths to a handler
 func (group HandlerGroup) Register(prefix string, mux *http.ServeMux) {
 	for _, h := range group {
 		defer recoverRoutes()

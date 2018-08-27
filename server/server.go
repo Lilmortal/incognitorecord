@@ -9,9 +9,9 @@ import (
 
 var portNumber = 3000
 
-// StartServer starts the server
+// StartServer starts the server.
+// This server will mostly handle the CRUD operations of blog posts.
 func StartServer() {
-
 	mux := http.NewServeMux()
 	route.HandleRoutes(mux)
 

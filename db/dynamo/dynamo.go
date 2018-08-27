@@ -11,14 +11,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-// Client is an implementation of DatabaseClient for DynamoDB.
+// PostClient is an implementation of a struct handling all posts related events for DynamoDB.
 // TODO: Think of a better name
-type Client struct {
+type PostClient struct {
 	DB *dynamodb.DynamoDB
 }
 
 // Post is a DynamoDB item
-// TODO: Where to put this...
 type Post struct {
 	CreationDate time.Time `json:"creationDate"`
 	Title        string    `json:"title"`
@@ -26,19 +25,19 @@ type Post struct {
 }
 
 // New generates and returns a client that is connected to DynamoDB. This client will be used to handle database interactions.
-func New(region string) (*Client, error) {
+func New(region string) (*PostClient, error) {
 	session, err := createDynamoSession(region)
 	if err != nil {
 		return nil, err
 	}
 	client := createDynamoClient(session)
 
-	return &Client{client}, err
+	return &PostClient{client}, err
 }
 
 // CreateTable creates a table in DynamoDB.
 // TODO: Move this to config, so we can inject this; meaning we can reuse this in the future to create other tables.
-func (client Client) CreateTable() (interface{}, error) {
+func (client PostClient) CreateTable() error {
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
@@ -69,13 +68,13 @@ func (client Client) CreateTable() (interface{}, error) {
 		TableName: aws.String("IncognitoRecord"),
 	}
 
-	res, err := client.DB.CreateTable(input)
+	_, err := client.DB.CreateTable(input)
 
-	return res, err
+	return err
 }
 
 // CreatePost creates a post item in DynamoDB.
-func (client Client) CreatePost(creationDate time.Time, title string, post string) error {
+func (client PostClient) CreatePost(creationDate time.Time, title string, post string) error {
 	newPost := Post{creationDate, title, post}
 
 	av, err := dynamodbattribute.MarshalMap(newPost)
@@ -90,7 +89,13 @@ func (client Client) CreatePost(creationDate time.Time, title string, post strin
 	return errItem
 }
 
-func (client Client) GetPost(title string) error {
+// GetPost gets a post in DynamoDB.
+func (client PostClient) GetPost(title string) error {
+	return nil
+}
+
+// DeletePost deletes a post in DynamoDB.
+func (client PostClient) DeletePost(title string) error {
 	return nil
 }
 
