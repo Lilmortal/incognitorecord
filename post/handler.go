@@ -16,32 +16,45 @@ type Handler struct {
 	DB db.PostClient
 }
 
-// TODO: After creating table, it should create post after that
 func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	if request.Method == http.MethodGet {
-		createPost(handler.DB)
+		err := createPost(handler.DB)
+		if err != nil {
+			// TODO: Understand what this means...
+			if awsErr, ok := err.(awserr.Error); ok {
+				switch awsErr.Code() {
+				case "ResourceNotFoundException":
+					// TODO: Tidy this up
+					err := createTable(handler.DB)
+					if err != nil {
+						if awsErr, ok := err.(awserr.Error); ok {
+							logging.AwsPrintln("Failed to create table.", awsErr)
+						}
+					}
+					postErr := createPost(handler.DB)
+					if postErr != nil {
+						if awsErr, ok := postErr.(awserr.Error); ok {
+							logging.AwsPrintln("Failed to create a post even though a table has been created.", awsErr)
+						}
+					}
+				default:
+					logging.AwsPrintln("Failed to create post.", awsErr)
+				}
+			}
+		}
+
 	}
 
 	fmt.Fprintf(writer, "Post created.")
 	log.Println("Post created.")
 }
 
-func createPost(db db.PostClient) {
+func createPost(db db.PostWriter) error {
 	err := db.CreatePost(time.Now(), "Title", "Post")
-	if err != nil {
-		// TODO: Understand what this means...
-		if awsErr, ok := err.(awserr.Error); ok {
-			switch awsErr.Code() {
-			case "ResourceNotFoundException":
-				err = db.CreateTable()
-				if err != nil {
-					if awsErr, ok := err.(awserr.Error); ok {
-						logging.AwsPrintln("Failed to create table.", awsErr)
-					}
-				}
-			default:
-				logging.AwsPrintln("Failed to create post.", awsErr)
-			}
-		}
-	}
+	return err
+}
+
+func createTable(db db.PostClient) error {
+	err := db.CreateTable()
+	return err
 }

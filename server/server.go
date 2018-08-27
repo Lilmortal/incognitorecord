@@ -1,3 +1,5 @@
+// Package server is a very generic package name
+// TODO: fix
 package server
 
 import (
