@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"incognitorecord/posts"
+	"incognitorecord/server"
 )
 
 func main() {
 	fmt.Println("Running")
 
-	posts.StartServer()
+	server.StartServer()
 }

@@ -14,7 +14,7 @@ import (
 // Client is an implementation of DatabaseClient for DynamoDB.
 // TODO: Think of a better name
 type Client struct {
-	client *dynamodb.DynamoDB
+	DB *dynamodb.DynamoDB
 }
 
 // Post is a DynamoDB item
@@ -33,12 +33,12 @@ func New(region string) (*Client, error) {
 	}
 	client := createDynamoClient(session)
 
-	return &Client{client: client}, err
+	return &Client{client}, err
 }
 
 // CreateTable creates a table in DynamoDB.
 // TODO: Move this to config, so we can inject this; meaning we can reuse this in the future to create other tables.
-func (client Client) CreateTable() (interface{}, error) {
+func (client Client) CreateTable() error {
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
@@ -69,9 +69,9 @@ func (client Client) CreateTable() (interface{}, error) {
 		TableName: aws.String("IncognitoRecord"),
 	}
 
-	res, err := client.client.CreateTable(input)
+	_, err := client.DB.CreateTable(input)
 
-	return res, err
+	return err
 }
 
 // CreatePost creates a post item in DynamoDB.
@@ -85,9 +85,13 @@ func (client Client) CreatePost(creationDate time.Time, title string, post strin
 	}
 	postInput := &dynamodb.PutItemInput{Item: av, TableName: aws.String("IncognitoRecord")}
 
-	_, errItem := client.client.PutItem(postInput)
+	_, errItem := client.DB.PutItem(postInput)
 
 	return errItem
+}
+
+func (client Client) GetPost(title string) error {
+	return nil
 }
 
 func createDynamoSession(region string) (*session.Session, error) {
