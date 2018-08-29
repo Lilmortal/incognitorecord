@@ -26,7 +26,6 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 	if request.Method == http.MethodGet {
 		err := createPost(handler.DB)
 		if err != nil {
-			// TODO: Understand what this means...
 			if awsErr, ok := err.(awserr.Error); ok {
 				switch awsErr.Code() {
 				case "ResourceNotFoundException":

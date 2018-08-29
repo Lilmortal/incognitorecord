@@ -1,6 +1,7 @@
 package dynamo
 
 import (
+	"errors"
 	"incognitorecord/config"
 	"time"
 
@@ -36,19 +37,22 @@ func New(region string) (*PostClient, error) {
 }
 
 // CreateTable creates a table in DynamoDB.
-func (client PostClient) CreateTable(config Config) error {
+func (client PostClient) CreateTable(config interface{}) error {
+	switch cg := config.(type) {
+	case Config:
+		input := &dynamodb.CreateTableInput{
+			AttributeDefinitions:  cg.AttributeDefinitions,
+			KeySchema:             cg.KeySchema,
+			ProvisionedThroughput: cg.ProvisionedThroughput,
+			TableName:             cg.TableName,
+		}
 
-	input := &dynamodb.CreateTableInput{
-		AttributeDefinitions:  config.AttributeDefinitions,
-		KeySchema:             config.KeySchema,
-		ProvisionedThroughput: config.ProvisionedThroughput,
-		TableName:             config.TableName,
+		_, err := client.DB.CreateTable(input)
+
+		return err
+	default:
+		return errors.New("Invalid config type")
 	}
-
-	_, err := client.DB.CreateTable(input)
-
-	return err
-
 }
 
 // CreatePost creates a post item in DynamoDB.
