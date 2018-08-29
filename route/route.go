@@ -16,7 +16,7 @@ func HandleRoutes(mux *http.ServeMux) {
 
 	v1HandlerGroup := HandlerGroup{
 		{
-			"/posts", post.Handler{DB: db},
+			"/posts", post.NewHandler(db),
 		}}
 
 	v1HandlerGroup.Register("/api/v1", mux)

@@ -36,41 +36,19 @@ func New(region string) (*PostClient, error) {
 }
 
 // CreateTable creates a table in DynamoDB.
-// TODO: Move this to config, so we can inject this; meaning we can reuse this in the future to create other tables.
-func (client PostClient) CreateTable() error {
+func (client PostClient) CreateTable(config Config) error {
+
 	input := &dynamodb.CreateTableInput{
-		AttributeDefinitions: []*dynamodb.AttributeDefinition{
-			{
-				AttributeName: aws.String("creationDate"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("title"),
-				AttributeType: aws.String("S"),
-			},
-		},
-		KeySchema: []*dynamodb.KeySchemaElement{
-			{
-				AttributeName: aws.String("title"),
-				// Primary key
-				KeyType: aws.String("HASH"),
-			},
-			{
-				AttributeName: aws.String("creationDate"),
-				// Sort key
-				KeyType: aws.String("RANGE"),
-			},
-		},
-		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
-			ReadCapacityUnits:  aws.Int64(5),
-			WriteCapacityUnits: aws.Int64(5),
-		},
-		TableName: aws.String("IncognitoRecord"),
+		AttributeDefinitions:  config.AttributeDefinitions,
+		KeySchema:             config.KeySchema,
+		ProvisionedThroughput: config.ProvisionedThroughput,
+		TableName:             config.TableName,
 	}
 
 	_, err := client.DB.CreateTable(input)
 
 	return err
+
 }
 
 // CreatePost creates a post item in DynamoDB.
@@ -82,7 +60,7 @@ func (client PostClient) CreatePost(creationDate time.Time, title string, post s
 	if err != nil {
 		return err
 	}
-	postInput := &dynamodb.PutItemInput{Item: av, TableName: aws.String("IncognitoRecord")}
+	postInput := &dynamodb.PutItemInput{Item: av, TableName: PostConfig.TableName}
 
 	_, errItem := client.DB.PutItem(postInput)
 

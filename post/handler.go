@@ -3,6 +3,7 @@ package post
 import (
 	"fmt"
 	"incognitorecord/db"
+	"incognitorecord/db/dynamo"
 	"incognitorecord/logging"
 	"log"
 	"net/http"
@@ -16,6 +17,11 @@ type Handler struct {
 	DB db.PostClient
 }
 
+// NewHandler creates a new Handler struct
+func NewHandler(DB db.PostClient) *Handler {
+	return &Handler{DB}
+}
+
 func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	if request.Method == http.MethodGet {
 		err := createPost(handler.DB)
@@ -24,8 +30,7 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 			if awsErr, ok := err.(awserr.Error); ok {
 				switch awsErr.Code() {
 				case "ResourceNotFoundException":
-					// TODO: Tidy this up
-					err := createTable(handler.DB)
+					err := createTable(handler.DB, dynamo.PostConfig)
 					if err != nil {
 						if awsErr, ok := err.(awserr.Error); ok {
 							logging.AwsPrintln("Failed to create table.", awsErr)
@@ -54,7 +59,7 @@ func createPost(db db.PostWriter) error {
 	return err
 }
 
-func createTable(db db.PostClient) error {
-	err := db.CreateTable()
+func createTable(db db.PostClient, config interface{}) error {
+	err := db.CreateTable(config)
 	return err
 }
